@@ -7,6 +7,10 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
+fastapi = "^0.115.0"
+pydantic = "^2.9.2"
+sqlalchemy = "^2.0.35"
+uvicorn = "^0.30.6"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -82,7 +86,8 @@ docstring-code-line-length = 60
 
 [tool.mypy]
 python_version = "3.12"
-follow_imports = "skip"
+plugins = ["pydantic.mypy"]
+follow_imports = "silent"
 warn_redundant_casts = true
 warn_unused_ignores = true
 disallow_any_generics = true
