@@ -11,6 +11,11 @@ fastapi = "^0.115.0"
 pydantic = "^2.9.2"
 sqlalchemy = "^2.0.35"
 uvicorn = "^0.30.6"
+pydantic-settings = "^2.5.2"
+redis = "^5.0.8"
+fastapi-limiter = "^0.1.6"
+alembic = "^1.13.2"
+asyncpg = "^0.29.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -87,7 +92,7 @@ docstring-code-line-length = 60
 [tool.mypy]
 python_version = "3.12"
 plugins = ["pydantic.mypy"]
-follow_imports = "silent"
+follow_imports = "skip"
 warn_redundant_casts = true
 warn_unused_ignores = true
 disallow_any_generics = true
