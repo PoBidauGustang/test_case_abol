@@ -101,6 +101,5 @@ explicit_package_bases = true
 no_implicit_reexport = true
 ignore_missing_imports = true
 exclude = [
-    "examples",
-    "external",
+    "src/migrations",
 ]
