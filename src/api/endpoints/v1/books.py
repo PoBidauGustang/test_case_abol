@@ -59,6 +59,8 @@ async def get_books(
                 title=book.title,
                 author=book.author,
                 published_date=book.published_date,
+                created_at=book.created_at,
+                updated_at=book.updated_at,
             )
             for book in paginated_data.results
         ],
