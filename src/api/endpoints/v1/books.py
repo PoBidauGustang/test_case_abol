@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 
 from src.api.schemas.api.v1.base import StringRepresent
 from src.api.schemas.api.v1.books import (
@@ -10,6 +10,7 @@ from src.api.schemas.api.v1.books import (
     ResponseBooksPaginated,
 )
 from src.api.services.book import BookService, get_book_service
+from src.api.services.user import get_me, is_admin
 from src.api.validators.book import (
     BookValidator,
     book_uuid_annotation,
@@ -24,9 +25,9 @@ router = APIRouter()
     "/",
     response_model=ResponseBooksPaginated,
     summary="Get a list of books",
+    dependencies=[Depends(get_me)],
 )
 async def get_books(
-    request: Request,
     books_service: BookService = Depends(get_book_service),
     paginator: Paginator = Depends(get_paginator),
 ) -> ResponseBooksPaginated:
@@ -37,6 +38,7 @@ async def get_books(
     Args:
     - **page_number** (str): The number of the page to get
     - **page_size** (str): The size of the page to get
+
     Returns:
     - **ResponseBooksPaginated**: The list of books: list[ResponseBook]
     """
@@ -72,9 +74,9 @@ async def get_books(
     response_model=ResponseBook,
     response_model_exclude_none=True,
     summary="Get a book details by uuid",
+    dependencies=[Depends(get_me)],
 )
 async def get_book(
-    request: Request,
     book_uuid: book_uuid_annotation,
     books_service: BookService = Depends(get_book_service),
 ) -> ResponseBook:
@@ -101,9 +103,9 @@ async def get_book(
     response_model=ResponseBook,
     response_model_exclude_none=True,
     summary="Create a book",
+    dependencies=[Depends(is_admin)],
 )
 async def create_book(
-    request: Request,
     body: RequestBookCreate,
     books_service: BookService = Depends(get_book_service),
     book_validator: BookValidator = Depends(get_book_validator),
@@ -125,9 +127,9 @@ async def create_book(
     response_model=ResponseBook,
     response_model_exclude_none=True,
     summary="Change the book by uuid",
+    dependencies=[Depends(is_admin)],
 )
 async def update_book(
-    request: Request,
     book_uuid: book_uuid_annotation,
     body: RequestBookUpdate,
     books_service: BookService = Depends(get_book_service),
@@ -153,9 +155,9 @@ async def update_book(
     "/{book_uuid}/",
     response_model=StringRepresent,
     summary="Delete the book by uuid",
+    dependencies=[Depends(is_admin)],
 )
 async def remove_book(
-    request: Request,
     book_uuid: book_uuid_annotation,
     books_service: BookService = Depends(get_book_service),
     book_validator: BookValidator = Depends(get_book_validator),

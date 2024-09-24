@@ -9,7 +9,7 @@ from redis.asyncio import Redis
 
 from src.api.endpoints.v1 import (
     books,
-    # users,
+    users,
 )
 from src.cache import redis
 from src.configs import LOGGING, settings
@@ -34,11 +34,11 @@ app = FastAPI(
 
 app.include_router(books.router, prefix="/book/v1/books", tags=["books"])
 
-# app.include_router(
-#     users.router,
-#     prefix="/book/v1/users",
-#     tags=["users"],
-# )
+app.include_router(
+    users.router,
+    prefix="/book/v1/users",
+    tags=["users"],
+)
 
 if __name__ == "__main__":
     uvicorn.run(

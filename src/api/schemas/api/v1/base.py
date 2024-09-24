@@ -2,7 +2,7 @@ from datetime import datetime
 from http import HTTPStatus
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field, SecretStr
 
 
 class UUIDMixin(BaseModel):
@@ -23,6 +23,24 @@ class TimeMixin(BaseModel):
     updated_at: datetime = Field(
         description="Дата последнего редактирования записи",
         examples=["2024-04-19T19:17:31.711Z"],
+    )
+
+    class Meta:
+        abstract = True
+
+
+class LoginMixin(BaseModel):
+    email: EmailStr = Field(
+        description="Email пользователя",
+        examples=["exemple@mail.ru"],
+        min_length=1,
+        max_length=64,
+    )
+    password: SecretStr = Field(
+        description="Пароль пользователя",
+        examples=["[2/#&/%M9:aOIzJ-Xb.0Ncod?HoQih"],
+        min_length=1,
+        max_length=255,
     )
 
     class Meta:
