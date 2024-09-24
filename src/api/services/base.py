@@ -1,8 +1,10 @@
+import json
 from typing import Generic, TypeVar
 from uuid import UUID
 
 from pydantic import BaseModel
 
+from src.cache.abstract import AbstractCache
 from src.db.repositories.abstract import AbstractRepository
 
 DBSchemaType = TypeVar("DBSchemaType", bound=BaseModel)
@@ -25,14 +27,43 @@ class BaseService(
         DBSchemaType, DBSchemaPaginationType, CreateSchemaType, UpdateSchemaType
     ],
 ):
+    def __init__(
+        self,
+        repository: AbstractRepository,
+        model: type[BaseModel],
+        cache: AbstractCache,
+    ):
+        super().__init__(repository, model)
+        self._cache = cache
+        self._service_name = self.__class__.__name__.lower()
+
     async def get(self, instance_uuid: UUID) -> DBSchemaType | None:
+        cache_key = self._cache.generate_cache_key("get", str(instance_uuid))
+        cached_data = await self._cache.get(cache_key)
+        if cached_data:
+            return self._model.model_validate(json.loads(cached_data))
+
         obj = await self._repository.get(instance_uuid)
         if obj is None:
             return None
         model = self._model.model_validate(obj, from_attributes=True)
+
+        serializable_data = self._cache.make_serializable(model.model_dump())
+        await self._cache.set(cache_key, json.dumps(serializable_data))
+
         return model
 
     async def get_all(self, **kwargs) -> list[DBSchemaType] | None:
+        cache_key = self._cache.generate_cache_key(
+            service_name=self._service_name, method_name="get_all", **kwargs
+        )
+        cached_data = await self._cache.get(cache_key)
+        if cached_data:
+            return [
+                self._model.model_validate(obj)
+                for obj in json.loads(cached_data)
+            ]
+
         objs: list[BaseModel] = await self._repository.get_all(**kwargs)
         if objs is None:
             return None
@@ -40,6 +71,13 @@ class BaseService(
             self._model.model_validate(obj, from_attributes=True)
             for obj in objs
         ]
+
+        serializable_data = [
+            self._cache.make_serializable(model.model_dump())
+            for model in models
+        ]
+        await self._cache.set(cache_key, json.dumps(serializable_data))
+
         return models
 
     async def create(self, obj: CreateSchemaType) -> DBSchemaType:

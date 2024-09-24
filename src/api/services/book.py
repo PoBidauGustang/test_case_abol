@@ -9,6 +9,7 @@ from src.api.schemas.api.v1.books import (
 )
 from src.api.schemas.db.book import BookDB
 from src.api.services.base import BaseService
+from src.cache.redis import RedisCache, get_redis
 from src.db.repositories.book import BookRepository, get_book_repository
 
 
@@ -26,5 +27,6 @@ class BookService(
 @lru_cache
 def get_book_service(
     repository: BookRepository = Depends(get_book_repository),
+    cache: RedisCache = Depends(get_redis),
 ) -> BookService:
-    return BookService(repository, BookDB)
+    return BookService(repository, BookDB, cache)
