@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 fastapi = "^0.115.0"
-pydantic = "^2.9.2"
+pydantic = {extras = ["email"], version = "^2.9.2"}
 sqlalchemy = "^2.0.35"
 uvicorn = "^0.30.6"
 pydantic-settings = "^2.5.2"
@@ -16,6 +16,9 @@ redis = "^5.0.8"
 fastapi-limiter = "^0.1.6"
 alembic = "^1.13.2"
 asyncpg = "^0.29.0"
+werkzeug = "^3.0.4"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+python-multipart = "^0.0.10"
 
 
 [tool.poetry.group.dev.dependencies]
