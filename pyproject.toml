@@ -7,6 +7,24 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.12"
+fastapi = "^0.115.0"
+pydantic = {extras = ["email"], version = "^2.9.2"}
+sqlalchemy = "^2.0.35"
+uvicorn = "^0.30.6"
+pydantic-settings = "^2.5.2"
+redis = "^5.0.8"
+fastapi-limiter = "^0.1.6"
+alembic = "^1.13.2"
+asyncpg = "^0.29.0"
+werkzeug = "^3.0.4"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+python-multipart = "^0.0.10"
+grpcio = "^1.66.1"
+grpcio-tools = "^1.66.1"
+faststream = "^0.5.23"
+aio-pika = "^9.4.3"
+flask = "^3.0.3"
+gunicorn = "^23.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -82,6 +100,7 @@ docstring-code-line-length = 60
 
 [tool.mypy]
 python_version = "3.12"
+plugins = ["pydantic.mypy"]
 follow_imports = "skip"
 warn_redundant_casts = true
 warn_unused_ignores = true
@@ -91,6 +110,6 @@ explicit_package_bases = true
 no_implicit_reexport = true
 ignore_missing_imports = true
 exclude = [
-    "examples",
-    "external",
+    "src/migrations",
+    "grpc_app/"
 ]

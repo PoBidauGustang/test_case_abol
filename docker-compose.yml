@@ -1,0 +1,126 @@
+services:
+
+  book_api:
+    build:
+      context: .
+      dockerfile: ./src/Dockerfile
+    container_name: ${API_HOST}
+    restart: always
+    environment:
+      - LOCAL=False
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    networks:
+      - services
+
+  postgres:
+    container_name: ${POSTGRES_HOST}
+    image: postgres:${POSTGRES_VERSION}
+    restart: always
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -h ${POSTGRES_HOST}" ]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    ports:
+      - "${POSTGRES_PORT_LOCAL}:${POSTGRES_PORT}"
+    networks:
+      - services
+
+  redis:
+    container_name: ${REDIS_HOST}
+    image: redis:${REDIS_VERSION}
+    restart: always
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+    volumes:
+      - redis_data:/var/lib/redis/data
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli", "ping" ]
+      interval: 1s
+      timeout: 3s
+      retries: 3
+      start_period: 1s
+    ports:
+      - "${REDIS_PORT_LOCAL}:${REDIS_PORT}"
+    networks:
+      - services
+
+  rabbitmq:
+    container_name: ${RABBITMQ_HOST}
+    image: rabbitmq:${RABBIT_VERSION}
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
+    ports:
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
+      - "${RABBITMQ_PORT_LOCAL}:${RABBITMQ_PORT_LOCAL}"
+    networks:
+      - services
+
+  grpc_server:
+    container_name: ${GRPC_SERVER_HOST}
+    build:
+      context: ./grpc_app/grpc_server
+      dockerfile: ./Dockerfile
+    ports:
+      - "${GRPC_SERVER_PORT}:${GRPC_SERVER_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    networks:
+      - services
+
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASS=${RABBITMQ_PASS}
+
+  flask_client:
+    build:
+      context: ./grpc_app/grpc_client
+      dockerfile: Dockerfile
+    ports:
+      - "${GRPC_CLIENT_PORT}:${GRPC_CLIENT_PORT}"
+    depends_on:
+      - grpc_server
+    environment:
+      - GRPC_SERVER_HOST=${GRPC_SERVER_HOST}
+      - GRPC_SERVER_PORT=${GRPC_SERVER_PORT}
+    networks:
+      - services
+
+
+volumes:
+  redis_data:
+  postgres_data:
+
+networks:
+  services:
+    driver: bridge
