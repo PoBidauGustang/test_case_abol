@@ -4,6 +4,7 @@ from src.configs.logger import LOGGING
 from src.configs.postgres import PostgresSettings
 from src.configs.rabbitmq import RabbitSettings
 from src.configs.redis import RedisSettings
+from src.configs.start_up import StartUpSettings
 from src.utils.settings import EnvSettings, FastApiSettings
 
 __all__ = [
@@ -12,6 +13,7 @@ __all__ = [
     "PostgresSettings",
     "RedisSettings",
     "RabbitSettings",
+    "StartUpSettings",
 ]
 
 logging_config.dictConfig(LOGGING)
@@ -23,6 +25,7 @@ class AppSettings(FastApiSettings):
 
 class Settings(EnvSettings):
     app: AppSettings = AppSettings()
+    start_up: StartUpSettings = StartUpSettings()
     postgres: PostgresSettings = PostgresSettings()
     redis: RedisSettings = RedisSettings()
     rabbit: RabbitSettings = RabbitSettings()

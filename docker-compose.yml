@@ -1,5 +1,25 @@
 services:
 
+  book_api:
+    build:
+      context: .
+      dockerfile: ./src/Dockerfile
+    container_name: ${API_HOST}
+    restart: always
+    environment:
+      - LOCAL=False
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    networks:
+      - services
+
   postgres:
     container_name: ${POSTGRES_HOST}
     image: postgres:${POSTGRES_VERSION}

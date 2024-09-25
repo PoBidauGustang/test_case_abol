@@ -21,7 +21,8 @@ class ServiceSettings(EnvSettings):
     port: int = 0
     host_local: str = "localhost"
     port_local: int = 8000
-    local: bool = Field(default=True)
+    # local: bool = Field(default=True)
+    local: bool = Field(..., alias="LOCAL")
 
     def correct_host(self) -> str:
         return self.host_local if self.local else self.host

@@ -24,6 +24,7 @@ grpcio-tools = "^1.66.1"
 faststream = "^0.5.23"
 aio-pika = "^9.4.3"
 flask = "^3.0.3"
+gunicorn = "^23.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
