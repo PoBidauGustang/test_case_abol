@@ -6,6 +6,7 @@ from uuid import UUID
 from redis.asyncio import Redis
 
 from src.cache.abstract import AbstractCache
+from src.utils.retry_decorator import retry
 
 logger = logging.getLogger("RedisCache")
 
@@ -21,15 +22,18 @@ class RedisCache(AbstractCache):
         await self.__cache.aclose()
         logger.info("Connection to Redis was closed.")
 
+    @retry(exceptions=(ConnectionError,))
     async def ping(self) -> Any:
         """
         Ping the Redis server to ensure the connection is still alive.
         """
         return await self.__cache.ping()
 
+    @retry(exceptions=(ConnectionError,))
     async def get(self, key: str):
         return await self.__cache.get(key)
 
+    @retry(exceptions=(ConnectionError,))
     async def set(self, key: str, value: str, expire: int = 600):
         await self.__cache.set(key, value, expire)
 

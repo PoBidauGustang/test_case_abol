@@ -13,6 +13,7 @@ from src.db.repositories.abstract import (
     ModelType,
     UpdateSchemaType,
 )
+from src.utils.retry_decorator import retry
 
 
 class InitRepository:
@@ -26,6 +27,7 @@ class PostgresRepositoryCD(
     AbstractRepositoryCD,
     Generic[ModelType, CreateSchemaType],
 ):
+    @retry(exceptions=(ConnectionError,))
     async def create(self, instance: CreateSchemaType) -> ModelType:
         async with self._database.get_session() as session:
             db_obj = self._model(**instance.dict())
@@ -34,6 +36,7 @@ class PostgresRepositoryCD(
             await session.refresh(db_obj)
             return db_obj
 
+    @retry(exceptions=(ConnectionError,))
     async def remove(self, instance_uuid: UUID, **kwargs) -> UUID:
         async with self._database.get_session() as session:
             await session.execute(
@@ -48,6 +51,7 @@ class PostgresRepositoryCRD(
     AbstractRepositoryCRD,
     Generic[ModelType, CreateSchemaType],
 ):
+    @retry(exceptions=(ConnectionError,))
     async def get_all(self, **kwargs) -> list[ModelType]:
         limit = kwargs.get("limit")
         offset = kwargs.get("offset")
@@ -60,6 +64,7 @@ class PostgresRepositoryCRD(
             db_obj = await session.execute(query)
             return db_obj.scalars().all()
 
+    @retry(exceptions=(ConnectionError,))
     async def get(self, instance_uuid: UUID, **kwargs) -> ModelType | Any:
         async with self._database.get_session() as session:
             db_obj = await session.execute(
@@ -73,6 +78,7 @@ class PostgresRepository(
     AbstractRepository,
     Generic[ModelType, CreateSchemaType, UpdateSchemaType],
 ):
+    @retry(exceptions=(ConnectionError,))
     async def update(
         self, instance_uuid: UUID, instance: UpdateSchemaType
     ) -> ModelType:
@@ -97,6 +103,7 @@ class PostgresRepository(
             )
             return db_obj.scalars().first()
 
+    @retry(exceptions=(ConnectionError,))
     async def get_uuid_filter_by(self, **kwargs) -> str | None:
         if not kwargs:
             raise ValueError("Filter by is empty")
