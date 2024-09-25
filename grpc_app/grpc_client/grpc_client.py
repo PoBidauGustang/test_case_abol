@@ -4,7 +4,10 @@ import time
 import books_pb2
 import books_pb2_grpc
 import grpc
+from dotenv import load_dotenv
 from flask import Flask, jsonify
+
+load_dotenv(".env")
 
 app = Flask(__name__)
 
@@ -14,7 +17,7 @@ def get_grpc_client():
     while retries > 0:
         try:
             channel = grpc.insecure_channel(
-                f'{os.getenv("GRPC_SERVER_HOST")}:{os.getenv("GRPC_SERVER_PORT")}'
+                f'{os.environ.get("GRPC_SERVER_HOST")}:{os.environ.get("GRPC_SERVER_PORT")}'
             )
             grpc.channel_ready_future(channel).result(timeout=10)
             client = books_pb2_grpc.BookServiceStub(channel)

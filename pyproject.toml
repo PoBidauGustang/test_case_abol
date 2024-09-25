@@ -110,5 +110,5 @@ no_implicit_reexport = true
 ignore_missing_imports = true
 exclude = [
     "src/migrations",
-    "src/grpc"
+    "grpc_app/"
 ]

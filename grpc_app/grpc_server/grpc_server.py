@@ -1,14 +1,29 @@
+import logging
+import os
 from concurrent import futures
 
 import books_pb2_grpc
 import grpc
 from books_pb2 import BookResponse, BooksListResponse
 from database import get_db
+from dotenv import load_dotenv
 from faststream.rabbit import RabbitBroker
 from models import Book
 from sqlalchemy.future import select
 
-broker = RabbitBroker("amqp://rabituser:123qwe@rabbitmq:5672/")
+load_dotenv(".env")
+
+
+logger = logging.getLogger()
+
+rabbit_user = os.environ.get("RABBITMQ_USER")
+rabbit_pass = os.environ.get("RABBITMQ_PASS")
+rabbit_host = os.environ.get("RABBITMQ_HOST")
+rabbit_port = os.environ.get("RABBITMQ_PORT")
+bro = f"amqp://{rabbit_user}:{rabbit_pass}@{rabbit_host}:{rabbit_port}/"
+broker = RabbitBroker(
+    f"amqp://{rabbit_user}:{rabbit_pass}@{rabbit_host}:{rabbit_port}/"
+)
 
 
 class BookService(books_pb2_grpc.BookServiceServicer):
@@ -50,7 +65,8 @@ class BookService(books_pb2_grpc.BookServiceServicer):
 
 @broker.subscriber("book_queue")
 async def on_message(body):
-    print(f" [x] Received message from RabbitMQ: {body}")
+    logger.info(f" [x] Received message from RabbitMQ: {body}")
+    print(body)
 
 
 async def serve():
@@ -63,6 +79,11 @@ async def serve():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s - %(name)s - %(message)s",
+        handlers=[logging.StreamHandler()],
+    )
     import asyncio
 
     asyncio.run(serve())

@@ -51,15 +51,15 @@ services:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
       - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
     ports:
-      - "${RABBITMQ_PORT1}:${RABBITMQ_PORT1}"
-      - "${RABBITMQ_PORT2}:${RABBITMQ_PORT2}"
+      - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
+      - "${RABBITMQ_PORT_LOCAL}:${RABBITMQ_PORT_LOCAL}"
     networks:
       - services
 
   grpc_server:
     container_name: ${GRPC_SERVER_HOST}
     build:
-      context: ./src/grpc_server
+      context: ./grpc_app/grpc_server
       dockerfile: ./Dockerfile
     ports:
       - "${GRPC_SERVER_PORT}:${GRPC_SERVER_PORT}"
@@ -78,10 +78,13 @@ services:
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_PORT=${POSTGRES_PORT}
       - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_PORT=${RABBITMQ_PORT}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASS=${RABBITMQ_PASS}
 
   flask_client:
     build:
-      context: ./grpc_client
+      context: ./grpc_app/grpc_client
       dockerfile: Dockerfile
     ports:
       - "${GRPC_CLIENT_PORT}:${GRPC_CLIENT_PORT}"
