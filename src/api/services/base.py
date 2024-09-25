@@ -2,6 +2,7 @@ import json
 from typing import Generic, TypeVar
 from uuid import UUID
 
+from faststream.rabbit import RabbitBroker
 from pydantic import BaseModel
 
 from src.cache.abstract import AbstractCache
@@ -32,10 +33,12 @@ class BaseService(
         repository: AbstractRepository,
         model: type[BaseModel],
         cache: AbstractCache,
+        broker: RabbitBroker,
     ):
         super().__init__(repository, model)
         self._cache = cache
         self._service_name = self.__class__.__name__.lower()
+        self._broker = broker
 
     async def get(self, instance_uuid: UUID) -> DBSchemaType | None:
         cache_key = self._cache.generate_cache_key("get", str(instance_uuid))
@@ -83,6 +86,11 @@ class BaseService(
     async def create(self, obj: CreateSchemaType) -> DBSchemaType:
         obj = await self._repository.create(obj)
         model = self._model.model_validate(obj, from_attributes=True)
+
+        message = f"Книга {model.title} была создана"
+        async with self._broker as br:
+            await br.publish(message, routing_key="book_queue")
+
         return model
 
     async def update(
@@ -90,10 +98,20 @@ class BaseService(
     ) -> DBSchemaType:
         obj = await self._repository.update(obj_uuid, obj)
         model = self._model.model_validate(obj, from_attributes=True)
+
+        message = f"Книга {model.title} была обновлена"
+        async with self._broker as br:
+            await br.publish(message, routing_key="book_queue")
+
         return model
 
     async def remove(self, obj_uuid: UUID) -> UUID:
         obj_uuid = await self._repository.remove(obj_uuid)
+
+        message = f"Книга с id {obj_uuid} была удалена"
+        async with self._broker as br:
+            await br.publish(message, routing_key="book_queue")
+
         return obj_uuid
 
     async def count(self) -> int | None:

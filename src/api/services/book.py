@@ -1,7 +1,9 @@
 from functools import lru_cache
 
 from fastapi import Depends
+from faststream.rabbit import RabbitBroker
 
+from src.api.brokers.rabbitmq import get_rabbit_broker
 from src.api.schemas.api.v1.books import (
     RequestBookCreate,
     RequestBookUpdate,
@@ -28,5 +30,6 @@ class BookService(
 def get_book_service(
     repository: BookRepository = Depends(get_book_repository),
     cache: RedisCache = Depends(get_redis),
+    broker: RabbitBroker = Depends(get_rabbit_broker),
 ) -> BookService:
-    return BookService(repository, BookDB, cache)
+    return BookService(repository, BookDB, cache, broker)
