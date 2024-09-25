@@ -19,6 +19,11 @@ asyncpg = "^0.29.0"
 werkzeug = "^3.0.4"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 python-multipart = "^0.0.10"
+grpcio = "^1.66.1"
+grpcio-tools = "^1.66.1"
+faststream = "^0.5.23"
+aio-pika = "^9.4.3"
+flask = "^3.0.3"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -105,4 +110,5 @@ no_implicit_reexport = true
 ignore_missing_imports = true
 exclude = [
     "src/migrations",
+    "src/grpc"
 ]
