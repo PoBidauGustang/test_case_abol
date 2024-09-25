@@ -43,9 +43,61 @@ services:
     networks:
       - services
 
+  rabbitmq:
+    container_name: ${RABBITMQ_HOST}
+    image: rabbitmq:${RABBIT_VERSION}
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
+    ports:
+      - "${RABBITMQ_PORT1}:${RABBITMQ_PORT1}"
+      - "${RABBITMQ_PORT2}:${RABBITMQ_PORT2}"
+    networks:
+      - services
+
+  grpc_server:
+    container_name: ${GRPC_SERVER_HOST}
+    build:
+      context: ./src/grpc_server
+      dockerfile: ./Dockerfile
+    ports:
+      - "${GRPC_SERVER_PORT}:${GRPC_SERVER_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    networks:
+      - services
+
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+
+  flask_client:
+    build:
+      context: ./grpc_client
+      dockerfile: Dockerfile
+    ports:
+      - "${GRPC_CLIENT_PORT}:${GRPC_CLIENT_PORT}"
+    depends_on:
+      - grpc_server
+    environment:
+      - GRPC_SERVER_HOST=${GRPC_SERVER_HOST}
+      - GRPC_SERVER_PORT=${GRPC_SERVER_PORT}
+    networks:
+      - services
+
+
 volumes:
   redis_data:
   postgres_data:
 
 networks:
   services:
+    driver: bridge
