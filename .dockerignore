@@ -22,6 +22,8 @@ infra/env/
 *.egg
 
 # Environments
+.env.test
+.env
 Infra/.env
 .venv
 env/
