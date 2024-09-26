@@ -60,3 +60,16 @@ class AbstractCache(ABC):
         Supports conversion of dictionaries, lists, and nested data structures.
         """
         raise NotImplementedError
+
+    @abstractmethod
+    async def invalidate_cache_with_prefix(
+        self, service_name: str, method_name: str
+    ):
+        """
+        Function to remove all cached values ​​with a certain prefix
+
+        Args:
+            service_name (str): prefix first part
+            method_name (str): prefix second part
+        """
+        raise NotImplementedError

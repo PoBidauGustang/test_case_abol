@@ -41,7 +41,9 @@ class BaseService(
         self._broker = broker
 
     async def get(self, instance_uuid: UUID) -> DBSchemaType | None:
-        cache_key = self._cache.generate_cache_key("get", str(instance_uuid))
+        cache_key = self._cache.generate_cache_key(
+            self._service_name, "get", str(instance_uuid)
+        )
         cached_data = await self._cache.get(cache_key)
         if cached_data:
             return self._model.model_validate(json.loads(cached_data))
@@ -91,6 +93,10 @@ class BaseService(
         async with self._broker as br:
             await br.publish(message, routing_key="book_queue")
 
+        await self._cache.invalidate_cache_with_prefix(
+            self._service_name, "get_all"
+        )
+
         return model
 
     async def update(
@@ -103,6 +109,10 @@ class BaseService(
         async with self._broker as br:
             await br.publish(message, routing_key="book_queue")
 
+        await self._cache.invalidate_cache_with_prefix(
+            self._service_name, "get_all"
+        )
+
         return model
 
     async def remove(self, obj_uuid: UUID) -> UUID:
@@ -111,6 +121,10 @@ class BaseService(
         message = f"Книга с id {obj_uuid} была удалена"
         async with self._broker as br:
             await br.publish(message, routing_key="book_queue")
+
+        await self._cache.invalidate_cache_with_prefix(
+            self._service_name, "get_all"
+        )
 
         return obj_uuid
 
