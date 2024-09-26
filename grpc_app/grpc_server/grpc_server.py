@@ -14,13 +14,11 @@ from sqlalchemy.future import select
 load_dotenv(".env")
 
 
-logger = logging.getLogger()
-
 rabbit_user = os.environ.get("RABBITMQ_USER")
 rabbit_pass = os.environ.get("RABBITMQ_PASS")
 rabbit_host = os.environ.get("RABBITMQ_HOST")
 rabbit_port = os.environ.get("RABBITMQ_PORT")
-bro = f"amqp://{rabbit_user}:{rabbit_pass}@{rabbit_host}:{rabbit_port}/"
+
 broker = RabbitBroker(
     f"amqp://{rabbit_user}:{rabbit_pass}@{rabbit_host}:{rabbit_port}/"
 )
@@ -66,7 +64,6 @@ class BookService(books_pb2_grpc.BookServiceServicer):
 @broker.subscriber("book_queue")
 async def on_message(body):
     logger.info(f" [x] Received message from RabbitMQ: {body}")
-    print(body)
 
 
 async def serve():
@@ -84,6 +81,8 @@ if __name__ == "__main__":
         format="%(asctime)s %(levelname)s - %(name)s - %(message)s",
         handlers=[logging.StreamHandler()],
     )
+    logger = logging.getLogger(__name__)
+
     import asyncio
 
     asyncio.run(serve())

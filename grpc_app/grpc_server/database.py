@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import (
 
 load_dotenv(".env")
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 
 postgres_user = os.environ.get("POSTGRES_USER")
@@ -38,15 +38,15 @@ class PostgresDatabase:
     @asynccontextmanager
     async def get_session(self) -> AsyncIterator[AsyncSession]:
         try:
-            logger.debug("==> Session open")
             session = self._async_session_factory()
+            logger.info("==> Session open")
             yield session
         except Exception as error:
-            logger.exception("==> Session rollback because of exception", error)
+            logger.error("==> Session rollback because of exception", error)
             await session.rollback()
             raise
         finally:
-            logger.debug("==> Session close")
+            logger.info("==> Session close")
             await session.close()
 
 
