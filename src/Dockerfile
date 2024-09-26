@@ -40,11 +40,6 @@ RUN pip install --no-cache-dir --upgrade -r ./requirements.txt
 COPY ./${APP_DIR} ./${APP_DIR}
 COPY ./alembic.ini ./
 
-# RUN sed -i 's/\r$//g'  ./entrypoint.sh && \
-#     chmod +x  ./entrypoint.sh
-
-
-# ENTRYPOINT ["sh", "entrypoint.sh"]
 RUN chmod +x ${APP_DIR}/entrypoint.sh
 
 ENTRYPOINT ["/bin/bash", "-c", "exec ${SRC_PATH}/${APP_DIR}/entrypoint.sh"]
