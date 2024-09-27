@@ -8,7 +8,9 @@ from http import HTTPStatus
         "password": "password",
         "username": "testuser"
     }, HTTPStatus.OK),
-    ({"email": "invalid-email", "password": "password", "username": "testuser"}, HTTPStatus.UNPROCESSABLE_ENTITY),
+    (
+        {"email": "invalid-email", "password": "password", "username": "testuser"}, HTTPStatus.UNPROCESSABLE_ENTITY
+    ),
     ({"email": "user@test.com", "password": "password"}, HTTPStatus.UNPROCESSABLE_ENTITY),
 ])
 @pytest.mark.asyncio

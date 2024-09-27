@@ -71,7 +71,9 @@ async def test_get_all_books(make_get_request, create_user, create_book, check_c
     ("invalid uuid", {"status": HTTPStatus.UNPROCESSABLE_ENTITY}),
 ])
 @pytest.mark.asyncio
-async def test_get_book_by_uuid(make_get_request, create_user, create_book, check_cache, db_session, get_access_token, book_uuid, expected):
+async def test_get_book_by_uuid(
+    make_get_request, create_user, create_book, check_cache, db_session, get_access_token, book_uuid, expected
+    ):
     if expected["status"] == HTTPStatus.UNAUTHORIZED:
         body, status, _ = await make_get_request(f"/books/{book_uuid}/")
         assert status == expected["status"]
