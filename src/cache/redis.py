@@ -64,6 +64,20 @@ class RedisCache(AbstractCache):
             case _:
                 return data
 
+    async def invalidate_cache_with_prefix(
+        self, service_name: str, method_name: str
+    ):
+        key_pattern = f"{service_name}:{method_name}:*"
+        cursor = 0
+        while True:
+            cursor, keys = await self.__cache.scan(
+                cursor=cursor, match=key_pattern, count=100
+            )
+            if keys:
+                await self.__cache.delete(*keys)
+            if cursor == 0:
+                break
+
 
 redis: RedisCache | None = None
 
