@@ -126,20 +126,25 @@ services:
     networks:
       - test_services
 
-  # test_container:
-  #   build:
-  #     context: ./tests
-  #     dockerfile: ./Dockerfile
-  #   depends_on:
-  #     - book_api
-  #     - flask_client
-  #   networks:
-  #     - test_services
-  #   env_file:
-  #     - .env.test
-  #   environment:
-  #     - API_URL=http://${API_HOST}:${API_PORT}
-  #     - GRPC_CLIENT_URL=http://${GRPC_CLIENT_HOST}:${GRPC_CLIENT_PORT}
+  test_container:
+    build:
+      # context: ./tests
+      dockerfile: ./tests/Dockerfile
+    restart: no
+    depends_on:
+      book_api:
+        condition: service_started
+      flask_client:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - test_services
+    env_file:
+      - .env.test
+
 
 volumes:
   test_redis_data:
