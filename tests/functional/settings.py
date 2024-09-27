@@ -81,7 +81,7 @@ class SQLAlchemyConnection(ServiceSettings):
     db_name: str
     user: str
     password: SecretStr
-    sqlalchemy_echo: bool = Field(default=True)
+    sqlalchemy_echo: bool = Field(default=False)
 
     @property
     def postgres_connection_url(self) -> URL:
